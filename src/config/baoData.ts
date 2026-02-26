@@ -1,0 +1,235 @@
+import { BaoId, BaoDefinition, Rarity } from '../types';
+
+export const ALL_BAO: BaoDefinition[] = [
+  // ---- Common (7) ----
+  {
+    id: BaoId.ChasiuBao,
+    name: 'Cha Siu Bao',
+    description: 'A classic BBQ pork bun with a heart of sweet, sticky char siu. Always the life of the dim sum cart!',
+    rarity: Rarity.Common,
+    baseColor: '#F5E6D3',
+    accentColor: '#C0392B',
+    pattern: 'solid',
+    faceExpression: 'happy',
+  },
+  {
+    id: BaoId.Mantou,
+    name: 'Mantou',
+    description: 'A plain steamed bun with nothing to hide. Simple, soft, and surprisingly confident about it.',
+    rarity: Rarity.Common,
+    baseColor: '#FEFCF3',
+    accentColor: '#E8DCCF',
+    pattern: 'solid',
+    faceExpression: 'sleepy',
+  },
+  {
+    id: BaoId.NaiWongBao,
+    name: 'Nai Wong Bao',
+    description: 'Bursting with golden custard that oozes like liquid sunshine. Caution: contents may cause happiness.',
+    rarity: Rarity.Common,
+    baseColor: '#FFF3C4',
+    accentColor: '#F6AD55',
+    pattern: 'gradient',
+    faceExpression: 'bliss',
+  },
+  {
+    id: BaoId.DouShaBao,
+    name: 'Dou Sha Bao',
+    description: 'Filled with sweet red bean paste and old-fashioned charm. Your grandma\'s favorite, and now yours too.',
+    rarity: Rarity.Common,
+    baseColor: '#F5E6D3',
+    accentColor: '#8B2252',
+    pattern: 'swirl',
+    faceExpression: 'happy',
+  },
+  {
+    id: BaoId.CaiBao,
+    name: 'Cai Bao',
+    description: 'Packed with mixed vegetables and good intentions. Tells everyone at the table to eat their greens.',
+    rarity: Rarity.Common,
+    baseColor: '#E8F5E9',
+    accentColor: '#4CAF50',
+    pattern: 'dots',
+    faceExpression: 'smug',
+  },
+  {
+    id: BaoId.ZhimaBao,
+    name: 'Zhima Bao',
+    description: 'Coated in sesame seeds and full of nutty black sesame paste. A tiny crunch with every hug!',
+    rarity: Rarity.Common,
+    baseColor: '#F5E6D3',
+    accentColor: '#5D4037',
+    pattern: 'dots',
+    faceExpression: 'happy',
+  },
+  {
+    id: BaoId.YincaiBao,
+    name: 'Yincai Bao',
+    description: 'Delicate silver-thread rolls layered with silky precision. Looks fancy but is secretly very chill.',
+    rarity: Rarity.Common,
+    baseColor: '#FAFAFA',
+    accentColor: '#BDBDBD',
+    pattern: 'stripes',
+    faceExpression: 'sleepy',
+  },
+
+  // ---- Uncommon (5) ----
+  {
+    id: BaoId.XiaoLongBao,
+    name: 'Xiao Long Bao',
+    description: 'A delicate soup dumpling hiding a piping-hot secret inside. Careful — this little one is a squirter!',
+    rarity: Rarity.Uncommon,
+    baseColor: '#FFF8E1',
+    accentColor: '#FFB74D',
+    pattern: 'gradient',
+    faceExpression: 'excited',
+  },
+  {
+    id: BaoId.LiuShaBao,
+    name: 'Liu Sha Bao',
+    description: 'Salted egg custard lava flows from within like molten gold. Dramatically splits open at every meal.',
+    rarity: Rarity.Uncommon,
+    baseColor: '#FFF9C4',
+    accentColor: '#FF8F00',
+    pattern: 'swirl',
+    faceExpression: 'sparkle',
+  },
+  {
+    id: BaoId.ShengJianBao,
+    name: 'Sheng Jian Bao',
+    description: 'Pan-fried to a crispy golden bottom and proud of that sizzle. Has a crunchy personality to match.',
+    rarity: Rarity.Uncommon,
+    baseColor: '#F5E6D3',
+    accentColor: '#D4A017',
+    pattern: 'gradient',
+    faceExpression: 'smug',
+  },
+  {
+    id: BaoId.ChaYeDanBao,
+    name: 'Cha Ye Dan Bao',
+    description: 'Marbled with fragrant tea-egg patterns like a tiny edible geode. Steeped in mystery and soy sauce.',
+    rarity: Rarity.Uncommon,
+    baseColor: '#D7CCC8',
+    accentColor: '#4E342E',
+    pattern: 'marble',
+    faceExpression: 'smug',
+  },
+  {
+    id: BaoId.TaroBao,
+    name: 'Taro Bao',
+    description: 'Soft purple taro filling with a dreamy pastel vibe. The aesthetic queen of the steamer basket.',
+    rarity: Rarity.Uncommon,
+    baseColor: '#E1BEE7',
+    accentColor: '#7B1FA2',
+    pattern: 'swirl',
+    faceExpression: 'bliss',
+  },
+
+  // ---- Rare (4) ----
+  {
+    id: BaoId.TangBao,
+    name: 'Tang Bao',
+    description: 'A giant soup bun you drink through a straw. Absolute unit of the bao world — big, bold, and brothy.',
+    rarity: Rarity.Rare,
+    baseColor: '#FFF3E0',
+    accentColor: '#E65100',
+    pattern: 'gradient',
+    faceExpression: 'excited',
+  },
+  {
+    id: BaoId.XiaJiaoBao,
+    name: 'Xia Jiao Bao',
+    description: 'Translucent crystal skin reveals plump shrimp within. Basically the glass house of dumplings.',
+    rarity: Rarity.Rare,
+    baseColor: '#FFE0E6',
+    accentColor: '#FF5252',
+    pattern: 'crystal',
+    faceExpression: 'sparkle',
+  },
+  {
+    id: BaoId.ZongziBao,
+    name: 'Zongzi Bao',
+    description: 'Wrapped in bamboo leaves and ready for dragon boat season. Carries the spirit of festival wherever it goes.',
+    rarity: Rarity.Rare,
+    baseColor: '#C8E6C9',
+    accentColor: '#2E7D32',
+    pattern: 'stripes',
+    faceExpression: 'fierce',
+  },
+  {
+    id: BaoId.MochaBao,
+    name: 'Mocha Bao',
+    description: 'Infused with ceremonial-grade matcha and zen energy. Meditates daily and has achieved inner peas.',
+    rarity: Rarity.Rare,
+    baseColor: '#C8E6C9',
+    accentColor: '#558B2F',
+    pattern: 'marble',
+    faceExpression: 'bliss',
+  },
+
+  // ---- Epic (3) ----
+  {
+    id: BaoId.HeijinBao,
+    name: 'Heijin Bao',
+    description: 'Jet-black charcoal dough with luxurious black truffle filling. The most mysterious bao at the gala.',
+    rarity: Rarity.Epic,
+    baseColor: '#2C2C2C',
+    accentColor: '#CFB53B',
+    pattern: 'marble',
+    faceExpression: 'smug',
+  },
+  {
+    id: BaoId.CaiHongBao,
+    name: 'Cai Hong Bao',
+    description: 'A radiant rainbow bao that shifts colors in the light. Spreads joy and glitter wherever it rolls.',
+    rarity: Rarity.Epic,
+    baseColor: '#FF6B6B',
+    accentColor: '#48DBFB',
+    pattern: 'swirl',
+    faceExpression: 'sparkle',
+  },
+  {
+    id: BaoId.BingHuoBao,
+    name: 'Bing Huo Bao',
+    description: 'Half frozen, half flaming — a bao of elemental extremes. Cannot decide if it needs a jacket or sunscreen.',
+    rarity: Rarity.Epic,
+    baseColor: '#81D4FA',
+    accentColor: '#FF5722',
+    pattern: 'flame',
+    faceExpression: 'fierce',
+  },
+
+  // ---- Legendary (2) ----
+  {
+    id: BaoId.LongBao,
+    name: 'Long Bao',
+    description: 'An ancient dragon bao radiating golden imperial energy. Rumored to grant wishes — but only after a nap.',
+    rarity: Rarity.Legendary,
+    baseColor: '#FFD700',
+    accentColor: '#B71C1C',
+    pattern: 'flame',
+    faceExpression: 'fierce',
+  },
+  {
+    id: BaoId.FengHuangBao,
+    name: 'Feng Huang Bao',
+    description: 'A mythical phoenix bao reborn from steam and spice. Every bite feels like a tiny rebirth ceremony.',
+    rarity: Rarity.Legendary,
+    baseColor: '#FF6F00',
+    accentColor: '#FFD54F',
+    pattern: 'crystal',
+    faceExpression: 'sparkle',
+  },
+];
+
+export function getBaoById(id: BaoId): BaoDefinition {
+  const bao = ALL_BAO.find((b) => b.id === id);
+  if (!bao) {
+    throw new Error(`Unknown BaoId: ${id}`);
+  }
+  return bao;
+}
+
+export function getBaosByRarity(rarity: Rarity): BaoDefinition[] {
+  return ALL_BAO.filter((b) => b.rarity === rarity);
+}
