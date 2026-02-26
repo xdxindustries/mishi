@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Player, PullResult, Rarity, SINGLE_PULL_COST, MULTI_PULL_COST } from '../types';
 import { getBaoById } from '../config/baoData';
 import { RARITY_CONFIG } from '../utils/rarity';
 import BaoSteamer from '../components/bao/BaoSteamer';
 import BaoArt from '../components/bao/BaoArt';
 import PullAnimation from '../components/pull/PullAnimation';
+import ParticleEffects from '../components/pull/ParticleEffects';
+import CardFan from '../components/collection/CardFan';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 
@@ -20,6 +22,8 @@ interface PullPageProps {
   dismissResults: () => void;
   onAnimationComplete: () => void;
 }
+
+const RARITY_ORDER = [Rarity.Common, Rarity.Uncommon, Rarity.Rare, Rarity.Epic, Rarity.Legendary];
 
 const PullPage: React.FC<PullPageProps> = ({
   player,
@@ -37,6 +41,70 @@ const PullPage: React.FC<PullPageProps> = ({
   const canPullMulti = player.tokens >= MULTI_PULL_COST && !pulling;
   const isMulti = pullResults.length > 1;
 
+  // Find highest rarity bao for reveal animation
+  const revealBao = useMemo(() => {
+    if (pullResults.length === 0) return undefined;
+    let highest = pullResults[0];
+    for (const result of pullResults) {
+      if (RARITY_ORDER.indexOf(result.rarity) > RARITY_ORDER.indexOf(highest.rarity)) {
+        highest = result;
+      }
+    }
+    try {
+      return getBaoById(highest.baoId);
+    } catch {
+      return undefined;
+    }
+  }, [pullResults]);
+
+  // Check if multi-pull has Epic+ results for confetti
+  const hasEpicPlus = useMemo(() => {
+    return isMulti && pullResults.some(r =>
+      r.rarity === Rarity.Epic || r.rarity === Rarity.Legendary
+    );
+  }, [isMulti, pullResults]);
+
+  // Confetti state
+  const [showConfetti, setShowConfetti] = useState(false);
+  useEffect(() => {
+    if (showResults && hasEpicPlus) {
+      setShowConfetti(true);
+      const t = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [showResults, hasEpicPlus]);
+
+  // Multi-pull fan items
+  const multiPullFanItems = useMemo(() => {
+    if (!isMulti) return [];
+    return pullResults.map((result) => {
+      try {
+        const bao = getBaoById(result.baoId);
+        return { bao, owned: player.collection[result.baoId] };
+      } catch {
+        return null;
+      }
+    }).filter(Boolean) as Array<{ bao: any; owned?: any }>;
+  }, [isMulti, pullResults, player.collection]);
+
+  // Find guaranteed index (highest rarity card)
+  const guaranteedIndex = useMemo(() => {
+    if (!isMulti) return undefined;
+    let highIdx = 0;
+    let highRarity = -1;
+    pullResults.forEach((r, i) => {
+      const order = RARITY_ORDER.indexOf(r.rarity);
+      if (order > highRarity) {
+        highRarity = order;
+        highIdx = i;
+      }
+    });
+    return highRarity >= RARITY_ORDER.indexOf(Rarity.Epic) ? highIdx : undefined;
+  }, [isMulti, pullResults]);
+
+  // Wobble intensity based on pulling state
+  const wobbleIntensity = pulling ? 'intense' : 'normal';
+
   return (
     <div style={styles.page}>
       {/* Pull Animation Overlay */}
@@ -44,7 +112,15 @@ const PullPage: React.FC<PullPageProps> = ({
         isActive={animationActive}
         rarity={animationRarity}
         onComplete={onAnimationComplete}
+        revealBao={revealBao}
       />
+
+      {/* Confetti */}
+      {showConfetti && (
+        <div className="confetti-container">
+          <ParticleEffects type="confetti" count={30} active={true} />
+        </div>
+      )}
 
       {/* Main content */}
       <div style={styles.content}>
@@ -54,6 +130,7 @@ const PullPage: React.FC<PullPageProps> = ({
             size={220}
             isShaking={pulling}
             isOpen={showResults}
+            wobbleIntensity={wobbleIntensity as 'normal' | 'intense'}
           />
         </div>
 
@@ -102,11 +179,21 @@ const PullPage: React.FC<PullPageProps> = ({
         onClose={dismissResults}
         title={isMulti ? 'Pull Results (10x)' : 'Pull Result'}
       >
-        <div style={isMulti ? styles.resultsGrid : styles.resultsSingle}>
-          {pullResults.map((result, index) => (
-            <ResultCard key={`${result.baoId}-${index}`} result={result} />
-          ))}
-        </div>
+        {isMulti ? (
+          <CardFan
+            items={multiPullFanItems}
+            size="sm"
+            staggerReveal={true}
+            staggerDelay={250}
+            guaranteedIndex={guaranteedIndex}
+          />
+        ) : (
+          <div style={styles.resultsSingle}>
+            {pullResults.map((result, index) => (
+              <ResultCard key={`${result.baoId}-${index}`} result={result} />
+            ))}
+          </div>
+        )}
         <div style={styles.dismissRow}>
           <Button variant="primary" onClick={dismissResults} style={{ width: '100%' }}>
             {isMulti ? 'Collect All' : 'Continue'}
@@ -225,12 +312,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   // Results
-  resultsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-    gap: '10px',
-    marginBottom: '16px',
-  },
   resultsSingle: {
     display: 'flex',
     justifyContent: 'center',

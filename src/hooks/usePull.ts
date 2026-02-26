@@ -11,6 +11,7 @@ export function usePull(
   const [animationRarity, setAnimationRarity] = useState<Rarity>(Rarity.Common);
   const [pullResults, setPullResults] = useState<PullResult[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState<string>('idle');
 
   const performPull = useCallback(
     async (pullType: 'single' | 'multi') => {
@@ -38,6 +39,7 @@ export function usePull(
         setPullResults(response.results);
 
         // Start the animation
+        setAnimationPhase('anticipation');
         setAnimationActive(true);
 
         // Update player state immediately (animation will play on top)
@@ -52,6 +54,7 @@ export function usePull(
 
   const onAnimationComplete = useCallback(() => {
     setAnimationActive(false);
+    setAnimationPhase('idle');
     setShowResults(true);
     setPulling(false);
   }, []);
@@ -70,6 +73,7 @@ export function usePull(
     showResults,
     animationRarity,
     animationActive,
+    animationPhase,
     pullSingle,
     pullMulti,
     dismissResults,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import { BaoDefinition, OwnedBao } from '../../types';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import BaoArt from './BaoArt';
@@ -9,15 +9,28 @@ interface BaoCardProps {
   owned?: OwnedBao;
   onClick?: () => void;
   showSilhouette?: boolean;
+  className?: string;
+  compact?: boolean;
 }
 
 /**
  * BaoCard — Card component for displaying a bao in grids.
  * Shows full art when owned, or a gray silhouette when unowned.
  */
-const BaoCard: React.FC<BaoCardProps> = ({ bao, owned, onClick, showSilhouette = false }) => {
+const BaoCard: React.FC<BaoCardProps> = ({ bao, owned, onClick, showSilhouette = false, className, compact = false }) => {
   const isHidden = showSilhouette && !owned;
   const rarityConfig = RARITY_CONFIG[bao.rarity];
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleClick = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.classList.add('card-popping');
+      setTimeout(() => {
+        cardRef.current?.classList.remove('card-popping');
+      }, 300);
+    }
+    onClick?.();
+  }, [onClick]);
 
   const renderRankStars = (rank: number) => {
     if (rank === 0) return null;
@@ -53,13 +66,15 @@ const BaoCard: React.FC<BaoCardProps> = ({ bao, owned, onClick, showSilhouette =
 
   return (
     <div
-      onClick={onClick}
+      ref={cardRef}
+      onClick={handleClick}
       style={{
         ...styles.card,
+        ...(compact ? styles.cardCompact : {}),
         borderLeft: `4px solid ${rarityConfig.color}`,
         cursor: onClick ? 'pointer' : 'default',
       }}
-      className="bao-card"
+      className={`bao-card${className ? ` ${className}` : ''}`}
     >
       {/* Art container */}
       <div
@@ -75,13 +90,13 @@ const BaoCard: React.FC<BaoCardProps> = ({ bao, owned, onClick, showSilhouette =
           pattern={bao.pattern}
           faceExpression={bao.faceExpression}
           rank={owned?.rank ?? 0}
-          size={90}
+          size={compact ? 70 : 90}
         />
       </div>
 
       {/* Info area */}
       <div style={styles.info}>
-        <div style={styles.name}>
+        <div style={compact ? styles.nameCompact : styles.name}>
           {isHidden ? '???' : bao.name}
         </div>
 
@@ -89,7 +104,7 @@ const BaoCard: React.FC<BaoCardProps> = ({ bao, owned, onClick, showSilhouette =
           <>
             <RarityBadge rarity={bao.rarity} />
 
-            {owned && (
+            {!compact && owned && (
               <div style={styles.meta}>
                 {owned.count > 1 && (
                   <span style={styles.count}>x{owned.count}</span>
@@ -126,6 +141,13 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 2px 8px rgba(74, 55, 40, 0.08)',
     width: '100%',
     minWidth: 0,
+    aspectRatio: '2 / 3',
+    justifyContent: 'center',
+  },
+  cardCompact: {
+    padding: '8px 6px 6px',
+    gap: '4px',
+    aspectRatio: '2 / 3',
   },
   artWrap: {
     display: 'flex',
@@ -147,6 +169,18 @@ const styles: Record<string, React.CSSProperties> = {
   name: {
     fontFamily: 'var(--font-display)',
     fontSize: '13px',
+    fontWeight: 700,
+    color: 'var(--color-text)',
+    textAlign: 'center',
+    lineHeight: 1.2,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '100%',
+  },
+  nameCompact: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '11px',
     fontWeight: 700,
     color: 'var(--color-text)',
     textAlign: 'center',

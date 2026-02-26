@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Player, Rarity, BaoDefinition } from '../types';
 import { ALL_BAO } from '../config/baoData';
 import { RARITY_CONFIG } from '../utils/rarity';
-import BaoCard from '../components/bao/BaoCard';
+import CardFan from '../components/collection/CardFan';
 
 interface AlmanacPageProps {
   player: Player;
@@ -75,53 +75,18 @@ const AlmanacPage: React.FC<AlmanacPageProps> = ({ player }) => {
             <div style={styles.tierLine} />
           </div>
 
-          {/* Tier grid */}
-          <div style={styles.tierGrid} className="almanac-tier-grid">
-            {tier.bao.map((bao) => {
-              const owned = player.collection[bao.id];
-              return (
-                <BaoCard
-                  key={bao.id}
-                  bao={bao}
-                  owned={owned}
-                  showSilhouette={true}
-                />
-              );
-            })}
-          </div>
+          {/* Tier fan */}
+          <CardFan
+            items={tier.bao.map(bao => ({
+              bao,
+              owned: player.collection[bao.id],
+            }))}
+            showSilhouettes={true}
+            size="md"
+          />
         </section>
       ))}
 
-      <style>{`
-        .almanac-tier-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          width: 100%;
-        }
-        @media (min-width: 480px) {
-          .almanac-tier-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-        @media (min-width: 700px) {
-          .almanac-tier-grid {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-          }
-        }
-        @media (min-width: 960px) {
-          .almanac-tier-grid {
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-          }
-        }
-        @media (min-width: 1200px) {
-          .almanac-tier-grid {
-            grid-template-columns: repeat(6, 1fr);
-          }
-        }
-      `}</style>
     </div>
   );
 };
@@ -185,9 +150,6 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     height: '1px',
     background: 'rgba(74, 55, 40, 0.1)',
-  },
-  tierGrid: {
-    width: '100%',
   },
 };
 

@@ -4,6 +4,7 @@ interface BaoSteamerProps {
   isOpen?: boolean;
   isShaking?: boolean;
   size?: number;
+  wobbleIntensity?: 'normal' | 'intense';
 }
 
 /**
@@ -14,12 +15,13 @@ const BaoSteamer: React.FC<BaoSteamerProps> = ({
   isOpen = false,
   isShaking = false,
   size = 220,
+  wobbleIntensity = 'normal',
 }) => {
   const uid = `steamer-${Math.random().toString(36).slice(2, 6)}`;
 
   return (
     <div
-      className={`bao-steamer${isShaking ? ' steamer-shaking' : ''}`}
+      className={`bao-steamer${isShaking ? ' steamer-shaking' : ''}${wobbleIntensity === 'intense' ? ' steamer-intense' : ''}`}
       style={{
         width: size,
         height: size * 0.85,
@@ -105,7 +107,7 @@ const BaoSteamer: React.FC<BaoSteamerProps> = ({
 
         {/* ===== STEAM WISPS (visible when closed/shaking) ===== */}
         {!isOpen && (
-          <g className="steamer-steam" opacity="0.5">
+          <g className="steamer-steam" opacity={wobbleIntensity === 'intense' ? '0.9' : '0.5'}>
             <ellipse cx="80" cy="60" rx="6" ry="10" fill="white" opacity="0.4">
               <animate attributeName="cy" values="65;35;10" dur="2.5s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0;0.4;0" dur="2.5s" repeatCount="indefinite" />

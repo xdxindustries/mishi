@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import PullPage from './pages/PullPage';
 import CollectionPage from './pages/CollectionPage';
 import AlmanacPage from './pages/AlmanacPage';
+import BackgroundSparkles from './components/common/BackgroundSparkles';
 
 // ---- App Shell for authenticated pages ----
 const AppShell: React.FC<{
@@ -20,6 +21,7 @@ const AppShell: React.FC<{
 }> = ({ tokens, username, onLogout }) => {
   return (
     <div style={styles.shell}>
+      <BackgroundSparkles />
       <Header tokens={tokens} username={username} onLogout={onLogout} />
       <main style={styles.main}>
         <Outlet />

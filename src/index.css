@@ -57,6 +57,7 @@
 
   /* Transitions */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce-strong: cubic-bezier(0.22, 1.5, 0.36, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: 150ms var(--ease-smooth);
   --transition-normal: 250ms var(--ease-smooth);
@@ -327,6 +328,132 @@ ul, ol {
   }
 }
 
+/* Kawaii idle breathing for cards in fan */
+@keyframes kawaiiFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--card-rotate, 0deg)); }
+  50% { transform: translateY(-4px) rotate(var(--card-rotate, 0deg)); }
+}
+
+/* Bouncy card pop on tap */
+@keyframes cardPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* Intensifying wobble for pull anticipation */
+@keyframes wobbleIntensify {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-3deg); }
+  20% { transform: rotate(4deg); }
+  30% { transform: rotate(-5deg); }
+  40% { transform: rotate(6deg); }
+  50% { transform: rotate(-7deg); }
+  60% { transform: rotate(8deg); }
+  70% { transform: rotate(-8deg); }
+  80% { transform: rotate(7deg); }
+  90% { transform: rotate(-4deg); }
+}
+
+/* Lid POPS off dramatically */
+@keyframes lidPop {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  30% { transform: translateY(-80px) rotate(-20deg) scale(1.1); }
+  50% { transform: translateY(-100px) rotate(-25deg) scale(1.05); }
+  100% { transform: translateY(-120px) rotate(-30deg) scale(0.9); opacity: 0; }
+}
+
+/* Radial light burst expanding outward */
+@keyframes lightBurst {
+  0% { transform: scale(0); opacity: 0; }
+  30% { transform: scale(0.5); opacity: 1; }
+  60% { transform: scale(1.3); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* Slow ray rotation */
+@keyframes raysSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Particle explosion outward */
+@keyframes particleBurst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--burst-x), var(--burst-y)) scale(0); opacity: 0; }
+}
+
+/* Sparkle dust settling down */
+@keyframes sparkleFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(40px) rotate(180deg); opacity: 0; }
+}
+
+/* Card materializes from glow center */
+@keyframes cardRevealEntry {
+  0% { transform: scale(0) rotate(10deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(-3deg); opacity: 1; }
+  70% { transform: scale(0.95) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Brief screen flash */
+@keyframes screenFlash {
+  0% { opacity: 0; }
+  15% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+/* Confetti falling */
+@keyframes confettiFall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Background ambient sparkles */
+@keyframes bgSparkleFloat {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  20% { opacity: 0.5; transform: translateY(-10px) scale(1); }
+  100% { transform: translateY(-60px) scale(0.5); opacity: 0; }
+}
+
+/* Number count bump */
+@keyframes numberBump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); color: var(--color-accent); }
+  100% { transform: scale(1); }
+}
+
+/* Rarity glow pulse post-reveal */
+@keyframes rarityPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--rarity-glow, rgba(255,255,255,0.3)); }
+  50% { box-shadow: 0 0 20px var(--rarity-glow, rgba(255,255,255,0.3)), 0 0 40px var(--rarity-glow, rgba(255,255,255,0.3)); }
+}
+
+/* Epic lightning flash */
+@keyframes lightningFlash {
+  0%, 100% { opacity: 0; }
+  10% { opacity: 1; }
+  20% { opacity: 0; }
+  30% { opacity: 0.8; }
+  40% { opacity: 0; }
+}
+
+/* Legendary golden wash */
+@keyframes goldenWash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+/* Multi-pull card dealing into fan */
+@keyframes multiCardDeal {
+  0% { opacity: 0; transform: translateX(50px) translateY(-30px) rotate(15deg) scale(0.5); }
+  60% { opacity: 1; transform: translateY(2px) rotate(calc(var(--card-rotate, 0deg) + 2deg)) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) rotate(var(--card-rotate, 0deg)) scale(1); }
+}
+
 /* ---- Screen Shake utility ---- */
 .screen-shake {
   animation: screenShake 0.5s ease-in-out;
@@ -346,4 +473,134 @@ ul, ol {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-secondary-hover);
+}
+
+/* ---- Card Fan Layout ---- */
+.card-fan-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 40px 20px 20px;
+  overflow-x: auto;
+  overflow-y: visible;
+  perspective: 1200px;
+  gap: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.card-fan-item {
+  flex-shrink: 0;
+  position: relative;
+  transform: rotate(var(--card-rotate, 0deg));
+  transform-origin: bottom center;
+  margin-left: var(--card-overlap, -30px);
+  z-index: var(--card-z, 0);
+  transition: transform 0.35s var(--ease-bounce), z-index 0s 0.35s, margin 0.35s var(--ease-smooth);
+  animation: kawaiiFloat 3s ease-in-out infinite;
+  animation-delay: calc(var(--card-index, 0) * 0.15s);
+  will-change: transform;
+  cursor: pointer;
+}
+
+.card-fan-item:first-child {
+  margin-left: 0;
+}
+
+.card-fan-item:hover {
+  transform: translateY(-24px) rotate(0deg) scale(1.08) !important;
+  z-index: 100 !important;
+  transition: transform 0.35s var(--ease-bounce), z-index 0s 0s;
+}
+
+.card-fan-item.stagger-reveal {
+  opacity: 0;
+  animation: multiCardDeal 0.5s var(--ease-bounce) forwards;
+  animation-delay: calc(var(--card-index, 0) * 250ms);
+}
+
+.card-fan-item.stagger-reveal.guaranteed-card {
+  animation: cardRevealEntry 0.6s var(--ease-bounce) forwards;
+  animation-delay: calc(var(--card-index, 0) * 250ms + 150ms);
+}
+
+/* Card fan size variants */
+.card-fan-container.fan-sm .card-fan-item {
+  width: 80px;
+  --card-overlap: -48px;
+  margin-left: var(--card-overlap);
+}
+.card-fan-container.fan-sm .card-fan-item:first-child { margin-left: 0; }
+
+.card-fan-container.fan-md .card-fan-item {
+  width: 120px;
+  --card-overlap: -30px;
+  margin-left: var(--card-overlap);
+}
+.card-fan-container.fan-md .card-fan-item:first-child { margin-left: 0; }
+
+.card-fan-container.fan-lg .card-fan-item {
+  width: 140px;
+  --card-overlap: -35px;
+  margin-left: var(--card-overlap);
+}
+.card-fan-container.fan-lg .card-fan-item:first-child { margin-left: 0; }
+
+@media (max-width: 480px) {
+  .card-fan-container {
+    justify-content: flex-start;
+    padding: 30px 12px 16px;
+  }
+  .card-fan-container.fan-md .card-fan-item {
+    width: 100px;
+    --card-overlap: -25px;
+    margin-left: var(--card-overlap);
+  }
+  .card-fan-container.fan-md .card-fan-item:first-child { margin-left: 0; }
+}
+
+/* Tap pop animation class */
+.card-popping {
+  animation: cardPop 0.3s ease-out !important;
+}
+
+/* Pull animation helpers */
+.steamer-intense {
+  animation: wobbleIntensify 0.4s ease-in-out infinite !important;
+}
+
+.pull-screen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  animation: screenFlash 0.3s ease-out forwards;
+}
+
+/* Confetti container */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 2.5s ease-in forwards;
+}
+
+/* Background sparkles */
+.bg-sparkle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  animation: bgSparkleFloat 4s ease-out infinite;
+  font-size: 12px;
+  opacity: 0;
 }

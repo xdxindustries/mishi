@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Player, BaoId, Rarity, BaoDefinition, OwnedBao } from '../types';
 import { ALL_BAO, getBaoById } from '../config/baoData';
 import { RARITY_CONFIG, compareByRarity } from '../utils/rarity';
-import CollectionGrid from '../components/collection/CollectionGrid';
+import CardFan from '../components/collection/CardFan';
 import CollectionFilters from '../components/collection/CollectionFilters';
 import BaoDetailModal from '../components/collection/BaoDetailModal';
 
@@ -104,9 +104,10 @@ const CollectionPage: React.FC<CollectionPageProps> = ({ player, onUpgrade }) =>
           <p style={styles.emptyText}>Go pull some to start your collection!</p>
         </div>
       ) : (
-        <CollectionGrid
+        <CardFan
           items={sortedItems}
           onCardClick={(baoId) => setSelectedBaoId(baoId)}
+          size="md"
         />
       )}
 
