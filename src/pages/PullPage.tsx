@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Player, PullResult, Rarity, SINGLE_PULL_COST, MULTI_PULL_COST } from '../types';
+import { Player, PullResult, Rarity, BaoId, SINGLE_PULL_COST, MULTI_PULL_COST } from '../types';
 import { getBaoById } from '../config/baoData';
 import { RARITY_CONFIG } from '../utils/rarity';
 import BaoSteamer from '../components/bao/BaoSteamer';
@@ -7,6 +7,8 @@ import BaoArt from '../components/bao/BaoArt';
 import PullAnimation from '../components/pull/PullAnimation';
 import ParticleEffects from '../components/pull/ParticleEffects';
 import CardFan from '../components/collection/CardFan';
+import CollectionGrid from '../components/collection/CollectionGrid';
+import BaoDetailModal from '../components/collection/BaoDetailModal';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 
@@ -21,6 +23,7 @@ interface PullPageProps {
   pullMulti: () => void;
   dismissResults: () => void;
   onAnimationComplete: () => void;
+  onUpgrade: (baoId: BaoId) => void;
 }
 
 const RARITY_ORDER = [Rarity.Common, Rarity.Uncommon, Rarity.Rare, Rarity.Epic, Rarity.Legendary];
@@ -36,10 +39,26 @@ const PullPage: React.FC<PullPageProps> = ({
   pullMulti,
   dismissResults,
   onAnimationComplete,
+  onUpgrade,
 }) => {
   const canPullSingle = player.tokens >= SINGLE_PULL_COST && !pulling;
   const canPullMulti = player.tokens >= MULTI_PULL_COST && !pulling;
   const isMulti = pullResults.length > 1;
+
+  // View mode for multi-pull results (default fan on mobile)
+  const [resultsView, setResultsView] = useState<'fan' | 'grid'>('fan');
+
+  // Detail modal for inspecting a pulled bao
+  const [detailBaoId, setDetailBaoId] = useState<BaoId | null>(null);
+  const detailBao = detailBaoId ? (() => {
+    try { return getBaoById(detailBaoId); } catch { return null; }
+  })() : null;
+  const detailOwned = detailBaoId ? player.collection[detailBaoId] : undefined;
+
+  // Reset view on new pull
+  useEffect(() => {
+    if (showResults) setResultsView('fan');
+  }, [showResults]);
 
   // Find highest rarity bao for reveal animation
   const revealBao = useMemo(() => {
@@ -74,35 +93,38 @@ const PullPage: React.FC<PullPageProps> = ({
     }
   }, [showResults, hasEpicPlus]);
 
-  // Multi-pull fan items
-  const multiPullFanItems = useMemo(() => {
+  // Multi-pull items - sort by rarity (highest first)
+  const multiPullItems = useMemo(() => {
     if (!isMulti) return [];
-    return pullResults.map((result) => {
+    const items = pullResults.map((result) => {
       try {
         const bao = getBaoById(result.baoId);
-        return { bao, owned: player.collection[result.baoId] };
+        return { bao, owned: player.collection[result.baoId], result };
       } catch {
         return null;
       }
-    }).filter(Boolean) as Array<{ bao: any; owned?: any }>;
+    }).filter(Boolean) as Array<{ bao: any; owned?: any; result: PullResult }>;
+
+    // Sort: highest rarity first
+    items.sort((a, b) => {
+      const aOrder = RARITY_ORDER.indexOf(a.result.rarity);
+      const bOrder = RARITY_ORDER.indexOf(b.result.rarity);
+      return bOrder - aOrder;
+    });
+
+    return items;
   }, [isMulti, pullResults, player.collection]);
 
-  // Find guaranteed index (highest rarity card)
-  const guaranteedIndex = useMemo(() => {
-    if (!isMulti) return undefined;
-    let highIdx = 0;
-    let highRarity = -1;
-    pullResults.forEach((r, i) => {
-      const order = RARITY_ORDER.indexOf(r.rarity);
-      if (order > highRarity) {
-        highRarity = order;
-        highIdx = i;
-      }
-    });
-    return highRarity >= RARITY_ORDER.indexOf(Rarity.Epic) ? highIdx : undefined;
-  }, [isMulti, pullResults]);
+  // Fan items (just bao + owned, without result)
+  const multiPullFanItems = useMemo(() => {
+    return multiPullItems.map(({ bao, owned }) => ({ bao, owned }));
+  }, [multiPullItems]);
 
-  // Wobble intensity based on pulling state
+  // Grid items
+  const multiPullGridItems = useMemo(() => {
+    return multiPullItems.map(({ bao, owned }) => ({ bao, owned }));
+  }, [multiPullItems]);
+
   const wobbleIntensity = pulling ? 'intense' : 'normal';
 
   return (
@@ -124,7 +146,6 @@ const PullPage: React.FC<PullPageProps> = ({
 
       {/* Main content */}
       <div style={styles.content}>
-        {/* Steamer */}
         <div style={styles.steamerArea}>
           <BaoSteamer
             size={220}
@@ -134,7 +155,6 @@ const PullPage: React.FC<PullPageProps> = ({
           />
         </div>
 
-        {/* Pity counters */}
         <div style={styles.pityRow}>
           <span style={styles.pityText}>
             Epic pity: {player.pity.pullsSinceEpic}/40
@@ -145,7 +165,6 @@ const PullPage: React.FC<PullPageProps> = ({
           </span>
         </div>
 
-        {/* Pull buttons */}
         <div style={styles.buttonRow}>
           <Button
             variant="primary"
@@ -167,7 +186,6 @@ const PullPage: React.FC<PullPageProps> = ({
           </Button>
         </div>
 
-        {/* Total pulls stat */}
         <p style={styles.statsText}>
           Total pulls: {player.totalPulls}
         </p>
@@ -180,17 +198,41 @@ const PullPage: React.FC<PullPageProps> = ({
         title={isMulti ? 'Pull Results (10x)' : 'Pull Result'}
       >
         {isMulti ? (
-          <CardFan
-            items={multiPullFanItems}
-            size="sm"
-            staggerReveal={true}
-            staggerDelay={250}
-            guaranteedIndex={guaranteedIndex}
-          />
+          <div style={styles.multiResults}>
+            {/* View toggle */}
+            <div className="view-toggle" style={{ alignSelf: 'center', marginBottom: '8px' }}>
+              <button
+                className={`view-toggle-btn${resultsView === 'fan' ? ' active' : ''}`}
+                onClick={() => setResultsView('fan')}
+              >
+                Fan
+              </button>
+              <button
+                className={`view-toggle-btn${resultsView === 'grid' ? ' active' : ''}`}
+                onClick={() => setResultsView('grid')}
+              >
+                Grid
+              </button>
+            </div>
+
+            {resultsView === 'fan' ? (
+              <CardFan
+                items={multiPullFanItems}
+                onCardClick={(baoId) => setDetailBaoId(baoId)}
+                size="sm"
+                coverflow
+              />
+            ) : (
+              <CollectionGrid
+                items={multiPullGridItems}
+                onCardClick={(baoId) => setDetailBaoId(baoId)}
+              />
+            )}
+          </div>
         ) : (
           <div style={styles.resultsSingle}>
             {pullResults.map((result, index) => (
-              <ResultCard key={`${result.baoId}-${index}`} result={result} />
+              <ResultCard key={`${result.baoId}-${index}`} result={result} onClick={() => setDetailBaoId(result.baoId)} />
             ))}
           </div>
         )}
@@ -200,13 +242,23 @@ const PullPage: React.FC<PullPageProps> = ({
           </Button>
         </div>
       </Modal>
+      {/* Detail modal for inspecting a pulled bao */}
+      {detailBao && (
+        <BaoDetailModal
+          bao={detailBao}
+          owned={detailOwned}
+          isOpen={!!detailBaoId}
+          onClose={() => setDetailBaoId(null)}
+          onUpgrade={onUpgrade}
+        />
+      )}
     </div>
   );
 };
 
 // ---- Result Card sub-component ----
 
-const ResultCard: React.FC<{ result: PullResult }> = ({ result }) => {
+const ResultCard: React.FC<{ result: PullResult; onClick?: () => void }> = ({ result, onClick }) => {
   const bao = getBaoById(result.baoId);
   const rarityConf = RARITY_CONFIG[result.rarity];
 
@@ -216,12 +268,12 @@ const ResultCard: React.FC<{ result: PullResult }> = ({ result }) => {
         ...styles.card,
         background: rarityConf.bgColor,
         borderColor: rarityConf.color,
+        cursor: onClick ? 'pointer' : 'default',
       }}
+      onClick={onClick}
     >
-      {/* NEW badge */}
       {result.isNew && <div style={styles.newBadge}>NEW!</div>}
 
-      {/* Bao art */}
       <BaoArt
         baoId={bao.id}
         baseColor={bao.baseColor}
@@ -232,10 +284,8 @@ const ResultCard: React.FC<{ result: PullResult }> = ({ result }) => {
         size={80}
       />
 
-      {/* Name */}
       <span style={styles.cardName}>{bao.name}</span>
 
-      {/* Rarity badge */}
       <span
         style={{
           ...styles.rarityBadge,
@@ -247,7 +297,6 @@ const ResultCard: React.FC<{ result: PullResult }> = ({ result }) => {
         {rarityConf.label}
       </span>
 
-      {/* Dupe count */}
       {result.isDuplicate && (
         <span style={styles.dupeText}>x{result.newCount}</span>
       )}
@@ -312,6 +361,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   // Results
+  multiResults: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
   resultsSingle: {
     display: 'flex',
     justifyContent: 'center',

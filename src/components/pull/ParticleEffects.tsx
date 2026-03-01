@@ -9,9 +9,14 @@ interface ParticleEffectsProps {
   active?: boolean;
 }
 
+const sparkleChars = ['✧', '✦', '⋆', '✵', '★', '☆'];
+
 /**
  * ParticleEffects — Renders different particle effect types using CSS animations.
- * Each type generates an array of absolutely-positioned div elements.
+ * - burst: radial explosion with diamond shapes
+ * - shower: diamond-shaped particles falling with rotation
+ * - confetti: colorful rectangles falling
+ * - sparkleDust: twinkle characters with scale+rotate
  */
 const ParticleEffects: React.FC<ParticleEffectsProps> = ({
   type,
@@ -34,39 +39,47 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({
         case 'burst': {
           const burstX = Math.cos(radians) * distance;
           const burstY = Math.sin(radians) * distance;
+          const size = 6 + Math.random() * 6;
+          const isDiamond = i % 3 !== 0;
           items.push({
             id: i,
             style: {
               position: 'absolute',
               left: '50%',
               top: '50%',
-              width: 6 + Math.random() * 4,
-              height: 6 + Math.random() * 4,
-              borderRadius: '50%',
-              background: color,
+              width: size,
+              height: size,
+              borderRadius: isDiamond ? '2px' : '50%',
+              background: i % 4 === 0 ? 'white' : color,
+              clipPath: isDiamond ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
               '--burst-x': `${burstX}px`,
               '--burst-y': `${burstY}px`,
-              animation: `particleBurst ${0.6 + Math.random() * 0.3}s ease-out forwards`,
-              animationDelay: `${i * 20}ms`,
+              animation: `particleBurst ${0.5 + Math.random() * 0.4}s ease-out forwards`,
+              animationDelay: `${i * 15}ms`,
               transform: 'translate(-50%, -50%)',
+              boxShadow: `0 0 ${4 + Math.random() * 4}px ${color}80`,
             } as React.CSSProperties,
           });
           break;
         }
         case 'shower': {
+          const size = 4 + Math.random() * 4;
+          const isDiamond = i % 2 === 0;
           items.push({
             id: i,
             style: {
               position: 'absolute',
-              left: `${10 + Math.random() * 80}%`,
-              top: `${-10 + Math.random() * 30}%`,
-              width: 4 + Math.random() * 3,
-              height: 4 + Math.random() * 3,
-              borderRadius: '50%',
-              background: color,
-              opacity: 0.6 + Math.random() * 0.4,
-              animation: `sparkleFall ${1.5 + Math.random() * 1}s ease-in forwards`,
-              animationDelay: `${i * 80}ms`,
+              left: `${5 + Math.random() * 90}%`,
+              top: `${-10 + Math.random() * 25}%`,
+              width: size,
+              height: size,
+              borderRadius: isDiamond ? '1px' : '50%',
+              background: i % 3 === 0 ? 'white' : color,
+              clipPath: isDiamond ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
+              opacity: 0.5 + Math.random() * 0.5,
+              animation: `sparkleFall ${1.2 + Math.random() * 1.2}s ease-in forwards`,
+              animationDelay: `${i * 60}ms`,
+              boxShadow: `0 0 3px ${color}60`,
             } as React.CSSProperties,
           });
           break;
@@ -90,28 +103,22 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({
           break;
         }
         case 'sparkleDust': {
-          const sparkleChars = ['✧', '✦', '⋆', '✵'];
           items.push({
             id: i,
             style: {
               position: 'absolute',
-              left: `${20 + Math.random() * 60}%`,
-              top: `${20 + Math.random() * 60}%`,
-              fontSize: `${8 + Math.random() * 8}px`,
-              color: color,
+              left: `${15 + Math.random() * 70}%`,
+              top: `${30 + Math.random() * 50}%`,
+              fontSize: `${10 + Math.random() * 10}px`,
+              color: i % 3 === 0 ? 'white' : color,
               opacity: 0,
-              animation: `sparkleFall ${2 + Math.random() * 1}s ease-out forwards`,
-              animationDelay: `${i * 150}ms`,
+              animation: `sparkleTwinkle ${1.5 + Math.random() * 1}s ease-out forwards`,
+              animationDelay: `${i * 120}ms`,
               pointerEvents: 'none',
+              textShadow: `0 0 6px ${color}`,
+              filter: `drop-shadow(0 0 3px ${color})`,
             } as React.CSSProperties,
-            // Store char in a way we can use
           });
-          // Override to add content via children
-          items[items.length - 1] = {
-            ...items[items.length - 1],
-            id: i,
-            // We'll handle text content in render
-          };
           break;
         }
       }
@@ -121,8 +128,6 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({
   }, [type, count, color]);
 
   if (!active) return null;
-
-  const sparkleChars = ['✧', '✦', '⋆', '✵'];
 
   return (
     <div style={containerStyle}>
@@ -139,7 +144,7 @@ const containerStyle: React.CSSProperties = {
   position: 'absolute',
   inset: 0,
   pointerEvents: 'none',
-  overflow: 'hidden',
+  overflow: 'visible',
 };
 
 export default ParticleEffects;

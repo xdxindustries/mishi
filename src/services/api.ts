@@ -8,8 +8,8 @@ import {
   SINGLE_PULL_COST,
   MULTI_PULL_COST,
   STARTING_TOKENS,
-  DUPES_TO_UPGRADE,
   MAX_RANK,
+  getUpgradeCost,
 } from '../types';
 import { executePull, executeMultiPull } from '../utils/gacha';
 import { getBaoById } from '../config/baoData';
@@ -58,11 +58,28 @@ function createNewPlayer(username: string): Player {
 
 // ---- API functions ----
 
+function migratePlayer(player: Player): Player {
+  // Migrate old rank system (max 9, flat 10 cost) to new (max 5, escalating costs)
+  let needsSave = false;
+  for (const key of Object.keys(player.collection)) {
+    const owned = player.collection[key];
+    if (owned.rank > MAX_RANK) {
+      // Refund approximate dupes for ranks above 5 (old system was 10 per rank)
+      const excessRanks = owned.rank - MAX_RANK;
+      owned.count += excessRanks * 10;
+      owned.rank = MAX_RANK;
+      needsSave = true;
+    }
+  }
+  if (needsSave) savePlayer(player);
+  return player;
+}
+
 export async function getOrCreatePlayer(username: string): Promise<Player> {
   if (USE_LOCAL) {
     const players = loadPlayers();
     if (players[username]) {
-      return players[username];
+      return migratePlayer(players[username]);
     }
     const newPlayer = createNewPlayer(username);
     savePlayer(newPlayer);
@@ -179,9 +196,11 @@ function doLocalUpgrade(username: string, baoId: BaoId): UpgradeResponse {
   const owned = player.collection[baoId];
   if (!owned) throw new Error(`Bao not owned: ${baoId}`);
   if (owned.rank >= MAX_RANK) throw new Error('Already at max rank');
-  if (owned.count < DUPES_TO_UPGRADE) throw new Error('Not enough duplicates');
+  const cost = getUpgradeCost(owned.rank);
+  if (cost < 0) throw new Error('Already at max rank');
+  if (owned.count < cost) throw new Error('Not enough duplicates');
 
-  owned.count -= DUPES_TO_UPGRADE;
+  owned.count -= cost;
   owned.rank += 1;
 
   // Verify the bao exists in our catalog (type safety)

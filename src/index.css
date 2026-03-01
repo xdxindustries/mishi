@@ -328,10 +328,10 @@ ul, ol {
   }
 }
 
-/* Kawaii idle breathing for cards in fan */
+/* Kawaii idle breathing for cards in fan — only vertical bob */
 @keyframes kawaiiFloat {
-  0%, 100% { transform: translateY(0) rotate(var(--card-rotate, 0deg)); }
-  50% { transform: translateY(-4px) rotate(var(--card-rotate, 0deg)); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 /* Bouncy card pop on tap */
@@ -431,6 +431,85 @@ ul, ol {
   50% { box-shadow: 0 0 20px var(--rarity-glow, rgba(255,255,255,0.3)), 0 0 40px var(--rarity-glow, rgba(255,255,255,0.3)); }
 }
 
+/* Bao-only cheer jump — bao jumps independently off the card */
+@keyframes baoCheerJump {
+  0%   { transform: translateX(-50%) scaleX(1) scaleY(1) translateY(0); }
+  8%   { transform: translateX(-50%) scaleX(1.22) scaleY(0.72) translateY(6px); }
+  20%  { transform: translateX(-50%) scaleX(0.78) scaleY(1.28) translateY(-70px); }
+  32%  { transform: translateX(-50%) scaleX(0.88) scaleY(1.1) translateY(-85px); }
+  44%  { transform: translateX(-50%) scaleX(0.95) scaleY(1.05) translateY(-40px); }
+  54%  { transform: translateX(-50%) scaleX(1.35) scaleY(0.6) translateY(2px); }
+  66%  { transform: translateX(-50%) scaleX(0.86) scaleY(1.18) translateY(-25px); }
+  76%  { transform: translateX(-50%) scaleX(1.1) scaleY(0.88) translateY(1px); }
+  86%  { transform: translateX(-50%) scaleX(0.96) scaleY(1.05) translateY(-8px); }
+  100% { transform: translateX(-50%) scaleX(1) scaleY(1) translateY(0); }
+}
+
+/* Shadow squish that syncs with bao jump */
+@keyframes baoShadow {
+  0%   { transform: scaleX(1); opacity: 0.15; }
+  8%   { transform: scaleX(1.3); opacity: 0.2; }
+  20%  { transform: scaleX(0.3); opacity: 0.05; }
+  32%  { transform: scaleX(0.2); opacity: 0.03; }
+  44%  { transform: scaleX(0.5); opacity: 0.08; }
+  54%  { transform: scaleX(1.5); opacity: 0.22; }
+  66%  { transform: scaleX(0.4); opacity: 0.06; }
+  76%  { transform: scaleX(1.15); opacity: 0.15; }
+  86%  { transform: scaleX(0.7); opacity: 0.12; }
+  100% { transform: scaleX(1); opacity: 0.15; }
+}
+
+/* Ring burst expanding outward */
+@keyframes ringExpand {
+  0%   { transform: scale(0); opacity: 0.8; border-width: 3px; }
+  60%  { opacity: 0.3; border-width: 2px; }
+  100% { transform: scale(3.5); opacity: 0; border-width: 1px; }
+}
+
+/* Speed lines flash in and fade */
+@keyframes speedLineFlash {
+  0%   { opacity: 0; }
+  15%  { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* Speed lines converging inward */
+@keyframes speedLineConverge {
+  0%   { opacity: 0; transform: scaleY(1.5); }
+  30%  { opacity: 0.7; }
+  100% { opacity: 0; transform: scaleY(0.3); }
+}
+
+/* Individual light ray breathing */
+@keyframes rayPulse {
+  0%, 100% { opacity: var(--ray-base-opacity, 0.3); }
+  50%      { opacity: var(--ray-peak-opacity, 0.7); }
+}
+
+/* Manga impact starburst */
+@keyframes starburstPop {
+  0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+  30%  { transform: scale(1.4) rotate(12deg); opacity: 1; }
+  60%  { transform: scale(0.95) rotate(-3deg); opacity: 0.9; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0; }
+}
+
+/* Sparkle twinkle with upward drift */
+@keyframes sparkleTwinkle {
+  0%   { transform: translateY(0) scale(0) rotate(0deg); opacity: 0; }
+  20%  { transform: translateY(-8px) scale(1.3) rotate(45deg); opacity: 1; }
+  50%  { transform: translateY(-20px) scale(0.7) rotate(90deg); opacity: 0.8; }
+  80%  { transform: translateY(-35px) scale(1.1) rotate(135deg); opacity: 0.3; }
+  100% { transform: translateY(-45px) scale(0.4) rotate(180deg); opacity: 0; }
+}
+
+/* Legendary energy wave expanding ring */
+@keyframes energyWave {
+  0%   { transform: scale(0.3); opacity: 0.7; box-shadow: 0 0 30px var(--wave-color); }
+  50%  { opacity: 0.3; box-shadow: 0 0 15px var(--wave-color); }
+  100% { transform: scale(5); opacity: 0; box-shadow: 0 0 0px var(--wave-color); }
+}
+
 /* Epic lightning flash */
 @keyframes lightningFlash {
   0%, 100% { opacity: 0; }
@@ -481,14 +560,22 @@ ul, ol {
   align-items: flex-end;
   justify-content: center;
   padding: 40px 20px 20px;
-  overflow-x: auto;
-  overflow-y: visible;
   perspective: 1200px;
   gap: 0;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+.card-fan-container::-webkit-scrollbar {
+  display: none;
 }
 
+/*
+ * Card fan item: uses a wrapper div for the static rotation (--card-rotate)
+ * and an inner animation layer for kawaiiFloat, so hover never fights the animation.
+ */
 .card-fan-item {
   flex-shrink: 0;
   position: relative;
@@ -497,20 +584,30 @@ ul, ol {
   margin-left: var(--card-overlap, -30px);
   z-index: var(--card-z, 0);
   transition: transform 0.35s var(--ease-bounce), z-index 0s 0.35s, margin 0.35s var(--ease-smooth);
-  animation: kawaiiFloat 3s ease-in-out infinite;
-  animation-delay: calc(var(--card-index, 0) * 0.15s);
   will-change: transform;
   cursor: pointer;
+}
+
+/* Inner wrapper handles the float animation separately */
+.card-fan-item .card-fan-float {
+  animation: kawaiiFloat 3s ease-in-out infinite;
+  animation-delay: calc(var(--card-index, 0) * 0.15s);
+  transition: transform 0.35s var(--ease-bounce);
 }
 
 .card-fan-item:first-child {
   margin-left: 0;
 }
 
+/* Hover: lift up, flatten rotation, scale. Stop float on hover to prevent jitter */
 .card-fan-item:hover {
-  transform: translateY(-24px) rotate(0deg) scale(1.08) !important;
+  transform: translateY(-20px) rotate(0deg) scale(1.08);
   z-index: 100 !important;
   transition: transform 0.35s var(--ease-bounce), z-index 0s 0s;
+}
+.card-fan-item:hover .card-fan-float {
+  animation-play-state: paused;
+  transform: translateY(0);
 }
 
 .card-fan-item.stagger-reveal {
@@ -548,7 +645,6 @@ ul, ol {
 
 @media (max-width: 480px) {
   .card-fan-container {
-    justify-content: flex-start;
     padding: 30px 12px 16px;
   }
   .card-fan-container.fan-md .card-fan-item {
@@ -557,6 +653,194 @@ ul, ol {
     margin-left: var(--card-overlap);
   }
   .card-fan-container.fan-md .card-fan-item:first-child { margin-left: 0; }
+}
+
+/* Mishi Bao face transition */
+.bao-face {
+  transition: opacity 0.15s ease-in-out;
+}
+
+/* ---- Cover Flow Carousel ---- */
+
+.coverflow-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  user-select: none;
+}
+
+.coverflow-viewport {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  perspective: 900px;
+  cursor: grab;
+}
+.coverflow-viewport:active {
+  cursor: grabbing;
+}
+
+.coverflow-track {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 900px;
+}
+
+.coverflow-item {
+  position: absolute;
+  width: 130px;
+  transform:
+    translateX(var(--cf-tx, 0))
+    rotateY(var(--cf-ry, 0deg))
+    scale(var(--cf-scale, 1));
+  z-index: var(--cf-z, 0);
+  opacity: var(--cf-opacity, 1);
+  transition: transform 0.4s var(--ease-bounce), opacity 0.3s ease;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.coverflow-item.coverflow-active {
+  cursor: pointer;
+}
+
+/* Active card gets subtle glow & breathe */
+.coverflow-active .bao-card {
+  box-shadow: 0 8px 32px rgba(74, 55, 40, 0.18), 0 2px 12px rgba(74, 55, 40, 0.1);
+}
+
+/* Reflection / shadow beneath active card */
+.coverflow-active::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 15%;
+  right: 15%;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(74, 55, 40, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Arrow buttons */
+.coverflow-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 2px 8px rgba(74, 55, 40, 0.15);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  font-size: 20px;
+  z-index: 200;
+  transition: all 0.2s var(--ease-smooth);
+  opacity: 0.8;
+}
+.coverflow-arrow:hover {
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(74, 55, 40, 0.2);
+  transform: translateY(-50%) scale(1.08);
+}
+.coverflow-arrow-prev { left: 8px; }
+.coverflow-arrow-next { right: 8px; }
+
+/* Label */
+.coverflow-label {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  min-height: 24px;
+  transition: opacity 0.2s ease;
+}
+
+/* Dot indicators */
+.coverflow-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 0;
+  flex-wrap: wrap;
+  max-width: 280px;
+}
+
+.coverflow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-smooth);
+}
+
+.coverflow-dot.active {
+  background: var(--color-primary);
+  transform: scale(1.4);
+}
+
+/* View toggle button group */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--color-bg-warm);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.view-toggle-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--color-text-light);
+  transition: all 0.2s var(--ease-smooth);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.view-toggle-btn.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 4px rgba(74, 55, 40, 0.12);
+}
+
+@media (max-width: 480px) {
+  .coverflow-viewport {
+    height: 250px;
+  }
+  .coverflow-item {
+    width: 110px;
+  }
+  .coverflow-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  .coverflow-arrow-prev { left: 4px; }
+  .coverflow-arrow-next { right: 4px; }
+  .coverflow-label {
+    font-size: 16px;
+  }
 }
 
 /* Tap pop animation class */

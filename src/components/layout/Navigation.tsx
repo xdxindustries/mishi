@@ -32,6 +32,21 @@ const tabs = [
     ),
   },
   {
+    to: '/playground',
+    label: 'Bistro',
+    icon: (active: boolean) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        {/* Restaurant/storefront icon */}
+        <path d="M3 10 L12 4 L21 10" fill="none" stroke={active ? '#f97356' : '#b8a99a'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="4" y="10" width="16" height="11" fill={active ? '#f97356' : '#b8a99a'} opacity="0.3" rx="1" />
+        <rect x="9" y="14" width="6" height="7" fill={active ? '#f97356' : '#b8a99a'} opacity="0.6" rx="1" />
+        <circle cx="13" cy="17.5" r="0.7" fill={active ? '#f97356' : '#b8a99a'} />
+        <rect x="5.5" y="11.5" width="3" height="3" rx="0.5" fill={active ? '#f97356' : '#b8a99a'} opacity="0.5" />
+        <rect x="15.5" y="11.5" width="3" height="3" rx="0.5" fill={active ? '#f97356' : '#b8a99a'} opacity="0.5" />
+      </svg>
+    ),
+  },
+  {
     to: '/almanac',
     label: 'Almanac',
     icon: (active: boolean) => (

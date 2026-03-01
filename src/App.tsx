@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import PullPage from './pages/PullPage';
 import CollectionPage from './pages/CollectionPage';
 import AlmanacPage from './pages/AlmanacPage';
+import PlaygroundPage from './pages/PlaygroundPage';
 import BackgroundSparkles from './components/common/BackgroundSparkles';
 
 // ---- App Shell for authenticated pages ----
@@ -113,6 +114,7 @@ function App() {
                   pullMulti={pull.pullMulti}
                   dismissResults={pull.dismissResults}
                   onAnimationComplete={pull.onAnimationComplete}
+                  onUpgrade={handleUpgrade}
                 />
               ) : (
                 <Navigate to="/" replace />
@@ -124,6 +126,16 @@ function App() {
             element={
               player ? (
                 <CollectionPage player={player} onUpgrade={handleUpgrade} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          <Route
+            path="/playground"
+            element={
+              player ? (
+                <PlaygroundPage player={player} />
               ) : (
                 <Navigate to="/" replace />
               )

@@ -29,9 +29,9 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({
   return (
     <>
       <div style={styles.grid} className="collection-grid">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <BaoCard
-            key={item.bao.id}
+            key={`${item.bao.id}-${index}`}
             bao={item.bao}
             owned={item.owned}
             onClick={() => onCardClick(item.bao.id)}

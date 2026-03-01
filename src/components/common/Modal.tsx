@@ -99,7 +99,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '20px',
     maxWidth: '480px',
     width: '100%',
-    maxHeight: '85vh',
+    maxHeight: '90vh',
     overflow: 'hidden',
     boxShadow: '0 20px 60px rgba(74, 55, 40, 0.2), 0 4px 16px rgba(74, 55, 40, 0.1)',
     animation: 'bounceIn 0.35s ease-out',
@@ -138,9 +138,9 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 1,
   },
   body: {
-    padding: '20px',
+    padding: '16px',
     overflowY: 'auto',
-    maxHeight: 'calc(85vh - 70px)',
+    maxHeight: 'calc(90vh - 60px)',
   },
 };
 

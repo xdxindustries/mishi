@@ -1,6 +1,7 @@
 import React from 'react';
-import { BaoDefinition, OwnedBao, BaoId, DUPES_TO_UPGRADE, MAX_RANK } from '../../types';
+import { BaoDefinition, OwnedBao, BaoId, MAX_RANK, getUpgradeCost } from '../../types';
 import { RARITY_CONFIG } from '../../utils/rarity';
+import { getNextBenefit } from '../../config/starBenefits';
 import Button from '../common/Button';
 
 interface UpgradePanelProps {
@@ -9,51 +10,58 @@ interface UpgradePanelProps {
   onUpgrade: (baoId: BaoId) => void;
 }
 
-/**
- * UpgradePanel — Shows rank progress and upgrade button within the detail modal.
- */
 const UpgradePanel: React.FC<UpgradePanelProps> = ({ bao, owned, onUpgrade }) => {
   const isMaxRank = owned.rank >= MAX_RANK;
-  const canUpgrade = owned.count >= DUPES_TO_UPGRADE && !isMaxRank;
-  const needed = DUPES_TO_UPGRADE - owned.count;
+  const cost = getUpgradeCost(owned.rank);
+  const canUpgrade = cost > 0 && owned.count >= cost && !isMaxRank;
+  const needed = cost > 0 ? cost - owned.count : 0;
   const progressPercent = isMaxRank
     ? 100
-    : Math.min((owned.count / DUPES_TO_UPGRADE) * 100, 100);
+    : cost > 0 ? Math.min((owned.count / cost) * 100, 100) : 0;
   const rarityColor = RARITY_CONFIG[bao.rarity].color;
+  const nextBenefit = getNextBenefit(owned.rank);
 
   return (
     <div style={styles.container}>
       {/* Rank display */}
       <div style={styles.rankRow}>
-        <span style={styles.rankLabel}>Rank</span>
+        <span style={styles.rankLabel}>Star Rank</span>
         <span style={styles.rankValue}>
-          {owned.rank} / {MAX_RANK}
+          {'★'.repeat(owned.rank)}{'☆'.repeat(MAX_RANK - owned.rank)}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div style={styles.progressTrack}>
-        <div
-          style={{
-            ...styles.progressFill,
-            width: `${progressPercent}%`,
-            background: isMaxRank
-              ? 'linear-gradient(90deg, #fbbf24, #f59e0b)'
-              : `linear-gradient(90deg, ${rarityColor}, ${rarityColor}dd)`,
-          }}
-        />
-        {!isMaxRank && (
+      {!isMaxRank && (
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressFill,
+              width: `${progressPercent}%`,
+              background: `linear-gradient(90deg, ${rarityColor}, ${rarityColor}dd)`,
+            }}
+          />
           <span style={styles.progressText}>
-            {owned.count} / {DUPES_TO_UPGRADE}
+            {owned.count} / {cost}
           </span>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Next benefit preview */}
+      {!isMaxRank && nextBenefit && (
+        <div style={styles.benefitPreview}>
+          <span style={styles.benefitLabel}>Next unlock:</span>
+          <span style={styles.benefitText}>
+            ★{nextBenefit.star} {nextBenefit.label}
+          </span>
+        </div>
+      )}
 
       {/* Action area */}
       <div style={styles.actionRow}>
         {isMaxRank && (
           <div style={styles.maxBadge} className="upgrade-max-badge">
-            MAX RANK
+            ★ MAX RANK ★
           </div>
         )}
 
@@ -63,7 +71,7 @@ const UpgradePanel: React.FC<UpgradePanelProps> = ({ bao, owned, onUpgrade }) =>
               variant="special"
               onClick={() => onUpgrade(bao.id)}
             >
-              Upgrade!
+              Upgrade to ★{owned.rank + 1}
             </Button>
           </div>
         )}
@@ -122,8 +130,8 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
-    padding: '14px 16px',
+    gap: '8px',
+    padding: '10px 14px',
     borderRadius: 'var(--radius-md)',
     background: 'var(--color-bg-warm)',
     border: '1px solid rgba(74, 55, 40, 0.08)',
@@ -140,10 +148,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-body)',
   },
   rankValue: {
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: 700,
-    color: 'var(--color-text)',
+    color: '#fbbf24',
     fontFamily: 'var(--font-display)',
+    letterSpacing: '2px',
   },
   progressTrack: {
     position: 'relative',
@@ -168,6 +177,26 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'var(--color-text)',
     fontFamily: 'var(--font-body)',
     textShadow: '0 0 4px rgba(255,255,255,0.8)',
+  },
+  benefitPreview: {
+    display: 'flex',
+    gap: '6px',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  benefitLabel: {
+    fontSize: '11px',
+    fontWeight: 600,
+    color: 'var(--color-text-muted)',
+    fontFamily: 'var(--font-body)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px',
+  },
+  benefitText: {
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#fbbf24',
+    fontFamily: 'var(--font-display)',
   },
   actionRow: {
     display: 'flex',

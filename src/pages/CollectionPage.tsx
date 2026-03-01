@@ -3,6 +3,7 @@ import { Player, BaoId, Rarity, BaoDefinition, OwnedBao } from '../types';
 import { ALL_BAO, getBaoById } from '../config/baoData';
 import { RARITY_CONFIG, compareByRarity } from '../utils/rarity';
 import CardFan from '../components/collection/CardFan';
+import CollectionGrid from '../components/collection/CollectionGrid';
 import CollectionFilters from '../components/collection/CollectionFilters';
 import BaoDetailModal from '../components/collection/BaoDetailModal';
 
@@ -11,14 +12,11 @@ interface CollectionPageProps {
   onUpgrade: (baoId: BaoId) => void;
 }
 
-/**
- * CollectionPage — "My Collection" page showing owned bao
- * with filtering, sorting, and detail modal.
- */
 const CollectionPage: React.FC<CollectionPageProps> = ({ player, onUpgrade }) => {
   const [activeRarity, setActiveRarity] = useState<Rarity | null>(null);
   const [sortBy, setSortBy] = useState<string>('rarity');
   const [selectedBaoId, setSelectedBaoId] = useState<BaoId | null>(null);
+  const [viewMode, setViewMode] = useState<'fan' | 'grid'>('fan');
 
   // Build owned items list
   const ownedItems = useMemo(() => {
@@ -86,28 +84,52 @@ const CollectionPage: React.FC<CollectionPageProps> = ({ player, onUpgrade }) =>
         </span>
       </div>
 
-      {/* Filters */}
+      {/* Filters + View Toggle */}
       {ownedItems.length > 0 && (
-        <CollectionFilters
-          activeRarity={activeRarity}
-          onRarityFilter={setActiveRarity}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
+        <div style={styles.controlsRow}>
+          <CollectionFilters
+            activeRarity={activeRarity}
+            onRarityFilter={setActiveRarity}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn${viewMode === 'fan' ? ' active' : ''}`}
+              onClick={() => setViewMode('fan')}
+              aria-label="Fan view"
+            >
+              Fan
+            </button>
+            <button
+              className={`view-toggle-btn${viewMode === 'grid' ? ' active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+            >
+              Grid
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Grid or empty state */}
+      {/* Content */}
       {ownedItems.length === 0 ? (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>~( ^o^)~</div>
           <h3 style={styles.emptyTitle}>No bao yet!</h3>
           <p style={styles.emptyText}>Go pull some to start your collection!</p>
         </div>
+      ) : viewMode === 'grid' ? (
+        <CollectionGrid
+          items={sortedItems}
+          onCardClick={(baoId) => setSelectedBaoId(baoId)}
+        />
       ) : (
         <CardFan
           items={sortedItems}
           onCardClick={(baoId) => setSelectedBaoId(baoId)}
           size="md"
+          coverflow
         />
       )}
 
@@ -156,6 +178,12 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'var(--color-bg-warm)',
     padding: '4px 12px',
     borderRadius: 'var(--radius-full)',
+  },
+  controlsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
   },
   emptyState: {
     display: 'flex',

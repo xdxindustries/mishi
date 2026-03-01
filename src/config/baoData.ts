@@ -199,7 +199,7 @@ export const ALL_BAO: BaoDefinition[] = [
     faceExpression: 'fierce',
   },
 
-  // ---- Legendary (2) ----
+  // ---- Legendary (3) ----
   {
     id: BaoId.LongBao,
     name: 'Long Bao',
@@ -209,6 +209,8 @@ export const ALL_BAO: BaoDefinition[] = [
     accentColor: '#B71C1C',
     pattern: 'flame',
     faceExpression: 'fierce',
+    artUrl: '/mishi/assets/bao/long/card.png',
+    revealArtUrl: '/mishi/assets/bao/long/reveal.png',
   },
   {
     id: BaoId.FengHuangBao,
@@ -219,6 +221,26 @@ export const ALL_BAO: BaoDefinition[] = [
     accentColor: '#FFD54F',
     pattern: 'crystal',
     faceExpression: 'sparkle',
+  },
+  {
+    id: BaoId.LexiconBao,
+    name: 'Lexicon Bao',
+    description: 'A fierce Sichuan warrior-scholar bao adorned with chili-red silk and a commanding topknot. Runs the dim sum boardroom with the fire of a thousand peppercorns.',
+    rarity: Rarity.Legendary,
+    baseColor: '#8B0000',
+    accentColor: '#FFD700',
+    pattern: 'flame',
+    faceExpression: 'smug',
+  },
+  {
+    id: BaoId.MishiBao,
+    name: 'Mishi Bao',
+    description: 'The rarest and most irresistibly adorable bao in existence. Switches between heart-melting puppy eyes and a mischievous little smirk — you never know which you\'ll get!',
+    rarity: Rarity.Legendary,
+    baseColor: '#FFF0F5',
+    accentColor: '#FF69B4',
+    pattern: 'gradient',
+    faceExpression: 'happy',
   },
 ];
 
